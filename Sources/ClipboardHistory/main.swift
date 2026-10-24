@@ -97,6 +97,8 @@ struct HistoryView: View {
                 Image(systemName: "clipboard.fill").foregroundStyle(.tint)
                 Text("Histórico de Clipboard").font(.headline)
                 Spacer()
+                Button { NSApp.terminate(nil) } label: { Image(systemName: "power") }
+                    .buttonStyle(.borderless).help("Sair do ClipboardHistory").accessibilityLabel("Sair do ClipboardHistory")
                 Button { showSettings = true } label: { Image(systemName: "gearshape") }
                     .buttonStyle(.borderless).help("Ajustes")
                 Button(action: detach) { Image(systemName: "arrow.up.left.and.arrow.down.right") }
@@ -140,7 +142,6 @@ struct HistoryView: View {
                 Spacer()
                 Button("Limpar") { confirmClear = true }.disabled(history.items.isEmpty)
                 Button("Fechar", action: close).help("Fechar a janela e manter o app em execução")
-                Button("Sair") { NSApp.terminate(nil) }
             }
             Text("Selecione para colar no app anterior").font(.caption).foregroundStyle(.secondary)
         }
