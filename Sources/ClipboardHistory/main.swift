@@ -139,6 +139,7 @@ struct HistoryView: View {
                 Toggle("Pausar", isOn: $history.paused).toggleStyle(.checkbox)
                 Spacer()
                 Button("Limpar") { confirmClear = true }.disabled(history.items.isEmpty)
+                Button("Fechar", action: close).help("Fechar a janela e manter o app em execução")
                 Button("Sair") { NSApp.terminate(nil) }
             }
             Text("Selecione para colar no app anterior").font(.caption).foregroundStyle(.secondary)
