@@ -3,14 +3,6 @@ import SwiftUI
 import Carbon
 import ApplicationServices
 
-struct Clip: Identifiable, Codable {
-    var id = UUID()
-    let date: Date
-    let text: String?
-    let image: Data?
-    var title: String { text ?? "Imagem" }
-}
-
 @MainActor
 final class History: ObservableObject {
     @Published var items: [Clip] = []
@@ -18,22 +10,36 @@ final class History: ObservableObject {
     private var changeCount: Int
     private var timer: Timer?
     private let file: URL
-    private let limit = 100
+    private let settings: LaunchSettings
+    private var policy: HistoryPolicy {
+        HistoryPolicy(limit: settings.itemLimit, retentionSeconds: settings.autoClearEnabled ? Double(settings.retentionSeconds) : nil)
+    }
 
-    init() {
+    init(settings: LaunchSettings) {
+        self.settings = settings
         let folder = URL.applicationSupportDirectory.appending(path: "ClipboardHistory", directoryHint: .isDirectory)
         file = folder.appending(path: "history.json")
         changeCount = NSPasteboard.general.changeCount
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         if let data = try? Data(contentsOf: file), let saved = try? JSONDecoder().decode([Clip].self, from: data) {
-            items = Array(saved.prefix(limit))
+            items = saved
+            applyPolicy()
         }
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.poll() }
         }
     }
 
+    private func applyPolicy() {
+        let retained = policy.retained(items)
+        if retained.count != items.count {
+            items = retained
+            save()
+        }
+    }
+
     private func poll() {
+        applyPolicy()
         let board = NSPasteboard.general
         guard board.changeCount != changeCount else { return }
         changeCount = board.changeCount
@@ -52,7 +58,7 @@ final class History: ObservableObject {
         } else { return }
         items.removeAll { $0.text == clip.text && $0.image == clip.image }
         items.insert(clip, at: 0)
-        items = Array(items.prefix(limit))
+        items = policy.retained(items)
         save()
     }
 
@@ -137,7 +143,7 @@ struct HistoryView: View {
             }
             Divider()
             HStack {
-                Text("\(history.items.count)/100").font(.caption).foregroundStyle(.secondary)
+                Text("\(history.items.count)/\(settings.itemLimit)").font(.caption).foregroundStyle(.secondary)
                 Toggle("Pausar", isOn: $history.paused).toggleStyle(.checkbox)
                 Spacer()
                 Button("Limpar") { confirmClear = true }.disabled(history.items.isEmpty)
@@ -160,8 +166,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     private var status: NSStatusItem!
     private let popover = NSPopover()
     private var floatingWindow: NSPanel?
-    private let history = History()
     private let settings = LaunchSettings()
+    private lazy var history = History(settings: settings)
     private var hotkey: EventHotKeyRef?
     private var handler: EventHandlerRef?
     private var destination: NSRunningApplication?

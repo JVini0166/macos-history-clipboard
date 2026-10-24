@@ -4,5 +4,8 @@ import PackageDescription
 let package = Package(
     name: "ClipboardHistory",
     platforms: [.macOS(.v14)],
-    targets: [.executableTarget(name: "ClipboardHistory")]
+    targets: [
+        .executableTarget(name: "ClipboardHistory"),
+        .testTarget(name: "ClipboardHistoryTests", dependencies: ["ClipboardHistory"])
+    ]
 )

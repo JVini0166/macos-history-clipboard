@@ -15,12 +15,13 @@ Um histórico de clipboard para macOS, inspirado na praticidade do histórico do
 
 | Recurso | Como funciona |
 | --- | --- |
-| Textos e imagens | Guarda até 100 itens, com prévia e data da cópia. |
+| Textos e imagens | Guarda de 1 a 1.000 itens, com prévia e data da cópia (100 por padrão). |
 | Atalho global | **Control + Command + V** abre o histórico. |
 | Busca | Encontre rapidamente um texto copiado. |
 | Colagem ao clicar | Volta ao aplicativo anterior e cola o item selecionado. |
 | Janela flutuante | Destaque o histórico e mova-o pela tela. |
 | Início automático | Ative **Iniciar sempre com o computador** nos ajustes. |
+| Limpeza automática | Opcional: expire itens após 5 ou 30 minutos, 1 ou 6 horas, 1, 7 ou 30 dias. |
 | Controle do histórico | Pause novas capturas, exclua um item ou limpe tudo. |
 | Dados locais | O histórico fica no seu Mac, sem envio à rede pelo app. |
 
@@ -55,7 +56,7 @@ A opção de início automático fica disponível na versão `.app`.
 3. Pressione **⌃⌘V** ou clique no ícone de clipboard na barra de menus.
 4. Busque e selecione um item. O app restaura o aplicativo anterior e envia **⌘V**.
 
-**Enter** seleciona o primeiro resultado da busca. **Escape** fecha o histórico.
+**Enter** seleciona o primeiro resultado da busca. **Escape** ou **Fechar** ocultam a janela e mantêm o aplicativo em execução. Para encerrar o app, use o ícone de **power**, à esquerda da engrenagem.
 
 Na primeira colagem, habilite **ClipboardHistory** em **Ajustes do Sistema → Privacidade e Segurança → Acessibilidade**. Essa permissão permite simular Command + V. Sem ela, o item continua sendo copiado e você pode colar manualmente.
 
@@ -73,6 +74,14 @@ Se aparecer uma solicitação de aprovação, clique em **Abrir Itens de Início
 
 Essa integração usa [`SMAppService.mainApp`](https://developer.apple.com/documentation/servicemanagement/smappservice), da Apple.
 
+## Limite de itens e limpeza automática
+
+Na **engrenagem → Histórico**, escolha a quantidade máxima de itens, de **1 a 1.000**. O padrão é 100. Reduzir o limite remove os itens mais antigos.
+
+A opção **Limpar itens antigos automaticamente** vem desativada. Ao ativar, escolha **5 minutos, 30 minutos, 1 hora, 6 horas, 1 dia, 7 dias ou 30 dias**. Cada item expira com base na data de sua cópia; itens já vencidos são removidos ao ativar ou encurtar o prazo. A limpeza continua com a captura pausada e é aplicada ao reabrir o app após ele ficar fechado. O clipboard atual não é alterado.
+
+As preferências ficam salvas entre sessões. Desativar a limpeza conserva os itens restantes, respeitando o limite escolhido.
+
 ## Privacidade e armazenamento
 
 O histórico é salvo em:
@@ -88,11 +97,19 @@ O histórico é salvo em:
 
 ## Limites da primeira versão
 
-- Até **100 itens**, **1 MB por texto** e **10 MB por imagem PNG**.
+- De **1 a 1.000 itens** (100 por padrão), **1 MB por texto** e **10 MB por imagem PNG**.
 - A captura consulta o clipboard a cada **0,5 segundo**; cópias muito rápidas podem não ser registradas.
 - Imagens são normalizadas para PNG. Arquivos, formatação rica e sincronização entre dispositivos não são suportados.
 - O atalho pode conflitar com outros aplicativos ou configurações. Se o registro falhar, o app avisa e continua acessível pela barra de menus.
 - O bundle local usa assinatura ad hoc. Distribuição pública requer preparação de assinatura e notarização.
+
+## Testes
+
+```sh
+swift test
+```
+
+Os testes verificam o limite de itens, a expiração no prazo definido, a conservação de itens com limpeza desativada e a persistência das preferências. O build do aplicativo completo pode ser validado com `./scripts/build-app.sh`.
 
 ## Estrutura do projeto
 
@@ -101,6 +118,8 @@ Assets/                         Logo e prompt de geração
 Sources/ClipboardHistory/
   main.swift                    Captura, histórico, interface e colagem
   SettingsView.swift            Ajustes e integração com Itens de Início
+  HistoryPolicy.swift           Limite e expiração de itens
+Tests/ClipboardHistoryTests/     Testes de retenção e preferências
 scripts/build-app.sh            Build, ícone e montagem do .app
 Package.swift                   Pacote Swift, sem dependências externas
 ```
