@@ -25,6 +25,14 @@ Um histórico de clipboard para macOS, inspirado na praticidade do histórico do
 | Controle do histórico | Pause novas capturas, exclua um item ou limpe tudo. |
 | Dados locais | O histórico fica no seu Mac, sem envio à rede pelo app. |
 
+## Conheça a interface
+
+Capturas das telas nativas em uma instância demonstrativa, com textos de exemplo e a logo do projeto. As configurações e o histórico pessoal não foram usados nas imagens.
+
+| Histórico de textos e imagens | Configurações do histórico |
+| --- | --- |
+| <img src="Assets/Screenshots/historico.png" width="440" alt="Histórico com textos demonstrativos, prévia de imagem, busca e controles" /> | <img src="Assets/Screenshots/configuracoes.png" width="390" alt="Configurações com início automático, limite de 100 itens e limpeza opcional após um dia" /> |
+
 ## Comece por aqui
 
 Requisitos: **macOS 14 ou superior**, **Swift 6** e ferramentas de desenvolvimento do Xcode com o SDK do macOS.
