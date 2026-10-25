@@ -2,6 +2,7 @@ import AppKit
 import SwiftUI
 import Carbon
 import ApplicationServices
+import Combine
 
 @MainActor
 final class History: ObservableObject {
@@ -95,27 +96,27 @@ struct HistoryView: View {
     @State private var confirmClear = false
     @FocusState private var searching: Bool
     var filtered: [Clip] {
-        history.items.filter { search.isEmpty || $0.title.localizedCaseInsensitiveContains(search) }
+        history.items.filter { search.isEmpty || ($0.text ?? settings.text("Imagem")).localizedCaseInsensitiveContains(search) }
     }
     var body: some View {
         VStack(spacing: 12) {
             HStack {
                 Image(systemName: "clipboard.fill").foregroundStyle(.tint)
-                Text("Histórico de Clipboard").font(.headline)
+                Text(settings.text("Histórico de Clipboard")).font(.headline)
                 Spacer()
                 Button { NSApp.terminate(nil) } label: { Image(systemName: "power") }
-                    .buttonStyle(.borderless).help("Sair do ClipboardHistory").accessibilityLabel("Sair do ClipboardHistory")
+                    .buttonStyle(.borderless).help(settings.text("Sair do ClipboardHistory")).accessibilityLabel(settings.text("Sair do ClipboardHistory"))
                 Button { showSettings = true } label: { Image(systemName: "gearshape") }
-                    .buttonStyle(.borderless).help("Ajustes")
+                    .buttonStyle(.borderless).help(settings.text("Ajustes"))
                 Button(action: detach) { Image(systemName: "arrow.up.left.and.arrow.down.right") }
-                    .buttonStyle(.borderless).help("Abrir como janela flutuante para arrastar")
+                    .buttonStyle(.borderless).help(settings.text("Abrir como janela flutuante para arrastar"))
                 Text("⌃⌘V").foregroundStyle(.secondary)
             }
-            TextField("Buscar textos…", text: $search)
+            TextField(settings.text("Buscar textos…"), text: $search)
                 .textFieldStyle(.roundedBorder).focused($searching)
                 .onSubmit { if let first = filtered.first { select(first) } }
             if filtered.isEmpty {
-                ContentUnavailableView(search.isEmpty ? "Seu histórico está vazio" : "Nenhum resultado", systemImage: "clipboard", description: Text("Copie textos ou imagens para vê-los aqui."))
+                ContentUnavailableView(search.isEmpty ? settings.text("Seu histórico está vazio") : settings.text("Nenhum resultado"), systemImage: "clipboard", description: Text(settings.text("Copie textos ou imagens para vê-los aqui.")))
             } else {
                 ScrollView {
                     LazyVStack(spacing: 8) {
@@ -129,13 +130,13 @@ struct HistoryView: View {
                                             Image(nsImage: image).resizable().scaledToFit().frame(width: 80, height: 60)
                                         } else { Image(systemName: "text.alignleft").foregroundStyle(.secondary) }
                                         VStack(alignment: .leading, spacing: 5) {
-                                            Text(item.title).lineLimit(3).frame(maxWidth: .infinity, alignment: .leading)
-                                            Text(item.date, format: .dateTime.day().month().hour().minute()).font(.caption).foregroundStyle(.secondary)
+                                            Text(item.text ?? settings.text("Imagem")).lineLimit(3).frame(maxWidth: .infinity, alignment: .leading)
+                                            Text(item.date, format: .dateTime.day().month().hour().minute().locale(settings.language.locale)).font(.caption).foregroundStyle(.secondary)
                                         }
                                     }.padding(10).contentShape(Rectangle())
                                 }.buttonStyle(.plain)
                                 Button { history.remove(item) } label: { Image(systemName: "xmark") }
-                                    .buttonStyle(.borderless).help("Excluir item").padding(10)
+                                    .buttonStyle(.borderless).help(settings.text("Excluir item")).padding(10)
                             }.background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 8))
                         }
                     }
@@ -144,19 +145,21 @@ struct HistoryView: View {
             Divider()
             HStack {
                 Text("\(history.items.count)/\(settings.itemLimit)").font(.caption).foregroundStyle(.secondary)
-                Toggle("Pausar", isOn: $history.paused).toggleStyle(.checkbox)
+                Toggle(settings.text("Pausar"), isOn: $history.paused).toggleStyle(.checkbox)
                 Spacer()
-                Button("Limpar") { confirmClear = true }.disabled(history.items.isEmpty)
-                Button("Fechar", action: close).help("Fechar a janela e manter o app em execução")
+                Button(settings.text("Limpar")) { confirmClear = true }.disabled(history.items.isEmpty)
+                Button(settings.text("Fechar"), action: close).help(settings.text("Fechar a janela e manter o app em execução"))
             }
-            Text("Selecione para colar no app anterior").font(.caption).foregroundStyle(.secondary)
+            Text(settings.text("Selecione para colar no app anterior")).font(.caption).foregroundStyle(.secondary)
         }
         .padding(16).frame(width: 440, height: 550)
+        .environment(\.locale, settings.language.locale)
         .sheet(isPresented: $showSettings) { SettingsView(settings: settings) }
         .onAppear { searching = true }
         .onExitCommand(perform: close)
-        .confirmationDialog("Apagar todo o histórico salvo?", isPresented: $confirmClear) {
-            Button("Apagar histórico", role: .destructive) { history.clear() }
+        .confirmationDialog(settings.text("Apagar todo o histórico salvo?"), isPresented: $confirmClear) {
+            Button(settings.text("Apagar histórico"), role: .destructive) { history.clear() }
+            Button(settings.text("Cancelar"), role: .cancel) {}
         }
     }
 }
@@ -172,6 +175,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     private var handler: EventHandlerRef?
     private var destination: NSRunningApplication?
     private var activationObserver: NSObjectProtocol?
+    private var languageSubscription: AnyCancellable?
     private var pasteTask: Task<Void, Never>?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -185,12 +189,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             }
         }
         status = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-        status.button?.image = NSImage(systemSymbolName: "clipboard", accessibilityDescription: "Histórico de Clipboard")
+        status.button?.image = NSImage(systemSymbolName: "clipboard", accessibilityDescription: settings.text("Histórico de Clipboard"))
         status.button?.target = self
         status.button?.action = #selector(toggle)
         popover.behavior = .transient
         popover.delegate = self
         popover.contentViewController = makeContent()
+        languageSubscription = settings.$language.sink { [weak self] language in
+            self?.floatingWindow?.title = language.text("Histórico de Clipboard")
+            self?.status.button?.image?.accessibilityDescription = language.text("Histórico de Clipboard")
+        }
         var event = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
         InstallEventHandler(GetApplicationEventTarget(), { _, _, context in
             guard let context else { return OSStatus(eventNotHandledErr) }
@@ -202,8 +210,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         let result = RegisterEventHotKey(UInt32(kVK_ANSI_V), UInt32(controlKey | cmdKey), EventHotKeyID(signature: 0x434C4950, id: 1), GetApplicationEventTarget(), 0, &hotkey)
         if result != noErr {
             let alert = NSAlert()
-            alert.messageText = "Atalho indisponível"
-            alert.informativeText = "Não foi possível registrar Control + Command + V. Abra o histórico pelo ícone na barra de menus."
+            alert.messageText = settings.text("Atalho indisponível")
+            alert.informativeText = settings.text("Não foi possível registrar Control + Command + V. Abra o histórico pelo ícone na barra de menus.")
             alert.runModal()
         }
     }
@@ -230,10 +238,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         guard let target = destination, !target.isTerminated else { return }
         guard AXIsProcessTrusted() else {
             let alert = NSAlert()
-            alert.messageText = "Permita a colagem automática"
-            alert.informativeText = "O item já foi copiado. Para colar ao clicar, habilite ClipboardHistory em Ajustes do Sistema → Privacidade e Segurança → Acessibilidade. Sem essa permissão, volte ao app e use Command + V."
-            alert.addButton(withTitle: "Abrir Ajustes")
-            alert.addButton(withTitle: "Agora não")
+            alert.messageText = settings.text("Permita a colagem automática")
+            alert.informativeText = settings.text("O item já foi copiado. Para colar ao clicar, habilite ClipboardHistory em Ajustes do Sistema → Privacidade e Segurança → Acessibilidade. Sem essa permissão, volte ao app e use Command + V.")
+            alert.addButton(withTitle: settings.text("Abrir Ajustes"))
+            alert.addButton(withTitle: settings.text("Agora não"))
             if alert.runModal() == .alertFirstButtonReturn,
                let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
                 NSWorkspace.shared.open(url)
@@ -267,7 +275,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         if let floatingWindow { return floatingWindow }
         let panel = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 440, height: 550),
                             styleMask: [.titled, .closable, .utilityWindow], backing: .buffered, defer: false)
-        panel.title = "Histórico de Clipboard"
+        panel.title = settings.text("Histórico de Clipboard")
         panel.isReleasedWhenClosed = false
         panel.level = .floating
         panel.hidesOnDeactivate = false

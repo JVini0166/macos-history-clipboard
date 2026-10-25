@@ -5,7 +5,6 @@ struct Clip: Identifiable, Codable {
     let date: Date
     let text: String?
     let image: Data?
-    var title: String { text ?? "Imagem" }
 }
 
 struct HistoryPolicy {

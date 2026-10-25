@@ -45,3 +45,39 @@ final class HistoryPolicyTests: XCTestCase {
         XCTAssertEqual(restored.retentionSeconds, 3600)
     }
 }
+
+final class AppLanguageTests: XCTestCase {
+    @MainActor
+    func testLanguageSwitchPersistsAcrossLaunches() throws {
+        let name = "ClipboardHistoryLanguageTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: name))
+        defer { defaults.removePersistentDomain(forName: name) }
+        let settings = LaunchSettings(defaults: defaults)
+        XCTAssertEqual(settings.language, .portuguese)
+        XCTAssertEqual(settings.text("Ajustes"), "Ajustes")
+        settings.language = .english
+        XCTAssertEqual(settings.text("Ajustes"), "Settings")
+        let restored = LaunchSettings(defaults: defaults)
+        XCTAssertEqual(restored.language, .english)
+        XCTAssertEqual(restored.text("Imagem"), "Image")
+        restored.language = .portuguese
+        XCTAssertEqual(LaunchSettings(defaults: defaults).language, .portuguese)
+    }
+
+    @MainActor
+    func testInvalidSavedLanguageFallsBackToPortuguese() throws {
+        let name = "ClipboardHistoryLanguageTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: name))
+        defer { defaults.removePersistentDomain(forName: name) }
+        defaults.set("unsupported", forKey: "appLanguage")
+        XCTAssertEqual(LaunchSettings(defaults: defaults).language, .portuguese)
+    }
+
+    func testLocalizedDatesUseSelectedLanguage() {
+        let date = Date(timeIntervalSince1970: 979560000)
+        let english = date.formatted(.dateTime.month(.wide).locale(AppLanguage.english.locale))
+        let portuguese = date.formatted(.dateTime.month(.wide).locale(AppLanguage.portuguese.locale))
+        XCTAssertEqual(english.lowercased(), "january")
+        XCTAssertEqual(portuguese.lowercased(), "janeiro")
+    }
+}

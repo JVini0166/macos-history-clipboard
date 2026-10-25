@@ -1,41 +1,42 @@
 <div align="center">
-  <img src="Assets/clipboard-history-logo.png" width="160" alt="Logo do ClipboardHistory: clipboard com cartões sobrepostos" />
+  <img src="Assets/clipboard-history-logo.png" width="160" alt="ClipboardHistory logo: a clipboard with stacked cards" />
   <h1>ClipboardHistory</h1>
-  <p>Copiou, ficou. Seu histórico de textos e imagens a um atalho de distância.</p>
+  <p>Copy it. Keep it. Your text and image history, one shortcut away.</p>
   <p>
-    <img src="https://img.shields.io/badge/macOS-14%2B-000000?logo=apple&logoColor=white" alt="macOS 14 ou superior" />
+    <img src="https://img.shields.io/badge/macOS-14%2B-000000?logo=apple&logoColor=white" alt="macOS 14 or later" />
     <img src="https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white" alt="Swift 6" />
-    <img src="https://img.shields.io/badge/interface-SwiftUI-007AFF" alt="Interface em SwiftUI" />
+    <img src="https://img.shields.io/badge/interface-SwiftUI-007AFF" alt="Built with SwiftUI" />
   </p>
 </div>
 
-Um histórico de clipboard para macOS, inspirado na praticidade do histórico do Windows. Vive na barra de menus, guarda suas últimas cópias e traz de volta aquele texto ou imagem que você já tinha perdido no próximo Command + C.
+A native clipboard history app for macOS, inspired by the convenience of Windows clipboard history. It lives in your menu bar and brings back the text or image you copied before your last Command + C.
 
-## O que ele faz
+## Features
 
-| Recurso | Como funciona |
+| Feature | What it does |
 | --- | --- |
-| Textos e imagens | Guarda de 1 a 1.000 itens, com prévia e data da cópia (100 por padrão). |
-| Atalho global | **Control + Command + V** abre o histórico. |
-| Busca | Encontre rapidamente um texto copiado. |
-| Colagem ao clicar | Volta ao aplicativo anterior e cola o item selecionado. |
-| Janela flutuante | Destaque o histórico e mova-o pela tela. |
-| Início automático | Ative **Iniciar sempre com o computador** nos ajustes. |
-| Limpeza automática | Opcional: expire itens após 5 ou 30 minutos, 1 ou 6 horas, 1, 7 ou 30 dias. |
-| Controle do histórico | Pause novas capturas, exclua um item ou limpe tudo. |
-| Dados locais | O histórico fica no seu Mac, sem envio à rede pelo app. |
+| Text and images | Keep 1–1,000 items with previews and timestamps; 100 by default. |
+| Global shortcut | Open history with **Control + Command + V**. |
+| Search | Find previously copied text. |
+| Click to paste | Return to the previous app and paste the selected item. |
+| Floating window | Detach history and move it around your screen. |
+| Launch at login | Start the app automatically when you log in. |
+| Optional expiration | Delete items after 5 or 30 minutes, 1 or 6 hours, or 1, 7 or 30 days. |
+| Two languages | Switch between **English (US)** and **Português (Brasil)** in Settings. |
+| History controls | Pause capture, delete individual items, or clear everything. |
+| Local storage | Clipboard history stays on your Mac; the app does not send it over the network. |
 
-## Conheça a interface
+## Screenshots
 
-Capturas das telas nativas em uma instância demonstrativa, com textos de exemplo e a logo do projeto. As configurações e o histórico pessoal não foram usados nas imagens.
+Native app screens captured in a separate demonstration instance using sample text and the project logo. No personal clipboard content or preferences were used.
 
-| Histórico de textos e imagens | Configurações do histórico |
+| Text and image history | Settings |
 | --- | --- |
-| <img src="Assets/Screenshots/historico.png" width="440" alt="Histórico com textos demonstrativos, prévia de imagem, busca e controles" /> | <img src="Assets/Screenshots/configuracoes.png" width="390" alt="Configurações com início automático, limite de 100 itens e limpeza opcional após um dia" /> |
+| <img src="Assets/Screenshots/historico.png" width="440" alt="Clipboard history showing sample text, an image preview, search, and history controls" /> | <img src="Assets/Screenshots/configuracoes.png" width="420" alt="Settings with language selection, launch at login, history capacity, and optional expiration" /> |
 
-## Comece por aqui
+## Getting started
 
-Requisitos: **macOS 14 ou superior**, **Swift 6** e ferramentas de desenvolvimento do Xcode com o SDK do macOS.
+Requirements: **macOS 14 or later**, **Swift 6**, and Xcode development tools with the macOS SDK.
 
 ```sh
 git clone https://github.com/JVini0166/macos-history-clipboard.git
@@ -44,90 +45,99 @@ cd macos-history-clipboard
 open dist/ClipboardHistory.app
 ```
 
-O script compila a versão de produção, gera o ícone e monta o aplicativo com assinatura ad hoc para uso local.
+The build script compiles a release binary, generates the app icon, and creates an app bundle with an ad hoc signature for local use.
 
-Para instalar, feche o app caso esteja aberto, copie **dist/ClipboardHistory.app** para **Aplicativos** e abra essa cópia. Faça isso antes de configurar o início automático para manter o aplicativo em um local estável.
+To install, quit any running copy, move **dist/ClipboardHistory.app** into **Applications**, and open the installed copy. Install it before enabling launch at login so the app stays in a stable location.
 
-Para trabalhar no código, abra `Package.swift` no Xcode ou execute:
+For development, open `Package.swift` in Xcode or run:
 
 ```sh
 swift build
 swift run
 ```
 
-A opção de início automático fica disponível na versão `.app`.
+Launch at login is only available when running the `.app` bundle.
 
-## Copiar → escolher → colar
+## Copy → choose → paste
 
-1. Deixe o ClipboardHistory aberto e copie um texto ou imagem normalmente.
-2. Clique no campo do aplicativo em que deseja colar.
-3. Pressione **⌃⌘V** ou clique no ícone de clipboard na barra de menus.
-4. Busque e selecione um item. O app restaura o aplicativo anterior e envia **⌘V**.
+1. Keep ClipboardHistory running and copy text or images as usual.
+2. Click the destination field in the app where you want to paste.
+3. Press **⌃⌘V** or click the clipboard icon in the menu bar.
+4. Search and select an item. ClipboardHistory restores the previous app and sends **⌘V**.
 
-**Enter** seleciona o primeiro resultado da busca. **Escape** ou **Fechar** ocultam a janela e mantêm o aplicativo em execução. Para encerrar o app, use o ícone de **power**, à esquerda da engrenagem.
+**Enter** selects the first search result. **Escape** or **Close** hides the window while keeping the app running. To quit, use the **power icon** to the left of the settings gear.
 
-Na primeira colagem, habilite **ClipboardHistory** em **Ajustes do Sistema → Privacidade e Segurança → Acessibilidade**. Essa permissão permite simular Command + V. Sem ela, o item continua sendo copiado e você pode colar manualmente.
+For automatic pasting, enable **ClipboardHistory** in **System Settings → Privacy & Security → Accessibility**. This permission allows the app to simulate Command + V. Without it, selecting an item still copies it, and you can paste manually.
 
-A colagem de imagens depende de o campo de destino aceitar imagens. O app disponibiliza PNG e representações nativas do macOS no clipboard.
+Image pasting requires a destination field that accepts images. The app provides PNG and native macOS image representations on the clipboard.
 
-## Uma janela que acompanha seu trabalho
+## A window that stays within reach
 
-Arraste o popover para fora da barra de menus ou use o botão de **setas** no cabeçalho. A janela destacada pode ser movida pela barra de título e permanece visível ao alternar entre aplicativos. Selecionar um item fecha a janela para devolver o foco ao destino.
+Drag the popover away from the menu bar or use the **arrows button** in its header. Move the detached window using its title bar; it stays visible when you switch apps. Selecting an item hides the window to return focus to the destination.
 
-## Iniciar sempre com o computador
+## Language
 
-Abra a **engrenagem** no cabeçalho e ative **Iniciar sempre com o computador**. O ClipboardHistory será aberto na barra de menus quando você entrar na sua conta do macOS.
+Open the **gear → Language** and choose **English (US)** or **Português (Brasil)**. Labels, tooltips, app alerts, and item dates update immediately, and the selection is saved for future sessions. Existing installations default to Brazilian Portuguese until you choose another language.
 
-Se aparecer uma solicitação de aprovação, clique em **Abrir Itens de Início** e autorize o aplicativo. O ajuste consulta o estado informado pelo sistema; desative a mesma opção para remover o início automático.
+The language setting does not translate copied content. macOS-owned dialogs and system error details follow the operating system's language.
 
-Essa integração usa [`SMAppService.mainApp`](https://developer.apple.com/documentation/servicemanagement/smappservice), da Apple.
+## Launch at login
 
-## Limite de itens e limpeza automática
+Open the **gear** and enable **Launch at login**. ClipboardHistory will open in the menu bar when you log in to your macOS account.
 
-Na **engrenagem → Histórico**, escolha a quantidade máxima de itens, de **1 a 1.000**. O padrão é 100. Reduzir o limite remove os itens mais antigos.
+If approval is required, click **Open Login Items** and authorize the app. The toggle reflects the status reported by macOS. Disable the same option to stop launching automatically.
 
-A opção **Limpar itens antigos automaticamente** vem desativada. Ao ativar, escolha **5 minutos, 30 minutos, 1 hora, 6 horas, 1 dia, 7 dias ou 30 dias**. Cada item expira com base na data de sua cópia; itens já vencidos são removidos ao ativar ou encurtar o prazo. A limpeza continua com a captura pausada e é aplicada ao reabrir o app após ele ficar fechado. O clipboard atual não é alterado.
+This integration uses Apple's [`SMAppService.mainApp`](https://developer.apple.com/documentation/servicemanagement/smappservice).
 
-As preferências ficam salvas entre sessões. Desativar a limpeza conserva os itens restantes, respeitando o limite escolhido.
+## History capacity and automatic cleanup
 
-## Privacidade e armazenamento
+Under **gear → History**, choose a capacity between **1 and 1,000 items**. The default is 100. Reducing the limit removes the oldest items.
 
-O histórico é salvo em:
+**Automatically delete old items** is off by default. When enabled, choose **5 minutes, 30 minutes, 1 hour, 6 hours, 1 day, 7 days, or 30 days**. Each item expires based on when it was copied. Already expired items are removed when you enable cleanup or shorten the duration.
+
+Cleanup continues while capture is paused. If the app is closed, expired items are removed the next time it opens. Cleanup does not change the current clipboard contents.
+
+Preferences persist across sessions. Turning cleanup off preserves remaining items, subject to the selected capacity.
+
+## Privacy and storage
+
+History is stored at:
 
 ```text
 ~/Library/Application Support/ClipboardHistory/history.json
 ```
 
-- O arquivo tem permissões de leitura e escrita restritas ao usuário, sem criptografia própria.
-- Conteúdos que o aplicativo de origem marcar como confidenciais, transitórios ou gerados automaticamente são ignorados. Conteúdos sensíveis sem essas marcações podem entrar no histórico.
-- **Pausar** interrompe novas capturas. **Limpar** apaga os itens salvos, sem alterar o conteúdo atual do clipboard.
-- O app não captura cópias feitas antes de sua abertura.
+- The file is restricted to the current user's read and write access, with no app-level encryption.
+- Content marked as concealed, transient, or automatically generated by its source app is ignored. Sensitive content without these markers can still enter history.
+- **Pause** stops new captures. **Clear** deletes saved history without changing the current clipboard contents.
+- The app does not capture items copied before it was launched.
 
-## Limites da primeira versão
+## Current limitations
 
-- De **1 a 1.000 itens** (100 por padrão), **1 MB por texto** e **10 MB por imagem PNG**.
-- A captura consulta o clipboard a cada **0,5 segundo**; cópias muito rápidas podem não ser registradas.
-- Imagens são normalizadas para PNG. Arquivos, formatação rica e sincronização entre dispositivos não são suportados.
-- O atalho pode conflitar com outros aplicativos ou configurações. Se o registro falhar, o app avisa e continua acessível pela barra de menus.
-- O bundle local usa assinatura ad hoc. Distribuição pública requer preparação de assinatura e notarização.
+- **1–1,000 items** (100 by default), **1 MB per text item**, and **10 MB per PNG image**.
+- Clipboard polling runs every **0.5 seconds**; rapid consecutive copies may be missed.
+- Images are normalized to PNG. Files, rich text formatting, and device synchronization are not supported.
+- The shortcut may conflict with other apps or settings. If registration fails, the app displays an alert and remains accessible from the menu bar.
+- Local builds use an ad hoc signature. Public distribution requires appropriate signing and notarization. Rebuilding the app may require renewing its Accessibility authorization.
 
-## Testes
+## Tests
 
 ```sh
 swift test
 ```
 
-Os testes verificam o limite de itens, a expiração no prazo definido, a conservação de itens com limpeza desativada e a persistência das preferências. O build do aplicativo completo pode ser validado com `./scripts/build-app.sh`.
+Tests cover capacity, expiration boundaries, keeping items when cleanup is disabled, saved preferences, language persistence and fallback, and date formatting for both locales. Validate the complete app bundle with `./scripts/build-app.sh`.
 
-## Estrutura do projeto
+## Project structure
 
 ```text
-Assets/                         Logo e prompt de geração
+Assets/                         Logo, generation prompt, and screenshots
 Sources/ClipboardHistory/
-  main.swift                    Captura, histórico, interface e colagem
-  SettingsView.swift            Ajustes e integração com Itens de Início
-  HistoryPolicy.swift           Limite e expiração de itens
-Tests/ClipboardHistoryTests/     Testes de retenção e preferências
-scripts/build-app.sh            Build, ícone e montagem do .app
-Package.swift                   Pacote Swift, sem dependências externas
+  main.swift                    Capture, history, interface, and paste behavior
+  SettingsView.swift            Preferences and Login Items integration
+  AppLanguage.swift             English and Brazilian Portuguese UI strings
+  HistoryPolicy.swift           Capacity and expiration rules
+Tests/ClipboardHistoryTests/     Retention, preferences, and language tests
+scripts/build-app.sh            Release build, icon, and .app packaging
+Package.swift                   Swift package with no external dependencies
 ```
